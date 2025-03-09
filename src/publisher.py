@@ -5,3 +5,5 @@ PORT = 1883
 TOPIC = "test/topic"
 
 client = mqtt.Client()
+
+client.connect(BROKER, PORT, 60)
