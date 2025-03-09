@@ -9,3 +9,5 @@ client = mqtt.Client()
 client.connect(BROKER, PORT, 60)
 
 client.publish(TOPIC, "Hello, Im Misagh")
+
+client.disconnect()
