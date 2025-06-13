@@ -1,145 +1,138 @@
-![github banner](https://github.com/user-attachments/assets/29d42856-8943-4d68-82d2-2fe9fb687146)
-# MQTT Messaging System with Python 📡
+# 📡 MQTT Messaging (Python)
 
-This project demonstrates how to use **MQTT (Message Queuing Telemetry Transport)** with Python for real-time communication between devices or applications. We’ll be using the **paho-mqtt** library to create both a **Publisher** and a **Subscriber** that send and receive messages via an MQTT Broker.
-
-## 📋 **Requirements**
-- Python 3.x
-- **paho-mqtt** library
-- A running MQTT Broker (e.g., HiveMQ, Mosquitto)
-
-## ⚙️ **Setup**
-
-1. **Install Dependencies**:
-   To install the required `paho-mqtt` library, run:
-   ```sh
-   pip install paho-mqtt
-   ```
-
-2. **Set up MQTT Broker**:
-   - You can use a public MQTT broker like [HiveMQ](https://www.hivemq.com/public-mqtt-broker/) or set up your own using **Mosquitto**.
-   - If you want to run a local MQTT broker, you can install **Mosquitto** using the following commands:
-     - On Ubuntu:
-       ```sh
-       sudo apt update
-       sudo apt install mosquitto mosquitto-clients
-       sudo systemctl enable mosquitto
-       sudo systemctl start mosquitto
-       ```
-     - For other systems, please follow the [Mosquitto installation guide](https://mosquitto.org/download/).
+A lightweight and configurable **MQTT pub/sub messaging tool** in Python. Built using the popular **Paho MQTT client**, it’s designed for rapid prototyping of IoT messaging, automation workflows, or testing pub/sub systems.
 
 ---
 
-## 🖥️ **Publisher Code (Sending Messages)**
+## 📋 Table of Contents
 
-### `publisher.py`
+1. [Overview](#overview)  
+2. [Features](#features)  
+3. [Prerequisites](#prerequisites)  
+4. [Installation](#installation)  
+5. [Usage Examples](#usage-examples)  
+6. [Code Structure](#code-structure)  
+7. [Security & Tips](#security--tips)  
+8. [Contributing](#contributing)  
+9. [License](#license)
 
-This script sends a message to a specific topic in the MQTT broker.
+---
 
-```python
-import paho.mqtt.client as mqtt
+## 💡 Overview
 
-BROKER = "broker.hivemq.com"
-PORT = 1883
-TOPIC = "test/topic"
+This project wraps basic MQTT functionality—**connecting**, **publishing**, and **subscribing**—into a reusable Python tool. Leveraging the **Paho MQTT client**, it supports features essential for IoT messaging such as QoS control, TLS settings, and auto-reconnect logic :contentReference[oaicite:1]{index=1}.
 
-client = mqtt.Client()
+---
 
-client.connect(BROKER, PORT, 60)
+## ✅ Features
 
-client.publish(TOPIC, "Hello MQTT from Python!")
+- 🔌 Connect to MQTT brokers using TCP or WebSocket  
+- 📢 Publish messages with customizable **QoS** and optional retain flag  
+- 📩 Subscribe to topics with callback handling  
+- 🔁 Auto-reconnect for improved reliability  
+- 🌐 TLS/SSL support & optional username/password authentication :contentReference[oaicite:2]{index=2}  
+- 📄 Simple CLI interface or importable module
 
-client.disconnect()
+---
+
+## 🛠️ Prerequisites
+
+- Python **3.7+**  
+- MQTT broker access (e.g., Mosquitto, EMQX, HiveMQ, or cloud broker)  
+- Required package:
+
+```bash
+pip install paho-mqtt
+````
+
+---
+
+## ⚙️ Installation
+
+```bash
+git clone https://github.com/MisaghMomeniB/MQTT-Messaging-Python.git
+cd MQTT-Messaging-Python
+pip install -r requirements.txt  # or 'pip install paho-mqtt'
 ```
 
-### Explanation:
-1. **Importing the library**: `paho.mqtt.client` provides the functionality to interact with MQTT.
-2. **Broker and Port Setup**: The MQTT broker we’re connecting to is `broker.hivemq.com` on port `1883`.
-3. **Connect to the Broker**: We establish a connection to the broker using `client.connect()`.
-4. **Publishing the Message**: We publish the message "Hello MQTT from Python!" to the topic `"test/topic"`.
-5. **Disconnecting**: After publishing the message, we disconnect from the broker.
-
 ---
 
-## 📡 **Subscriber Code (Receiving Messages)**
+## 🚀 Usage Examples
 
-### `subscriber.py`
-
-This script listens to a specific topic and prints any messages that are sent to that topic.
+### 🔗 Connect & Subscribe
 
 ```python
-import paho.mqtt.client as mqtt
+from mqtt_messaging import MQTTPublisher, MQTTSubscriber
 
-BROKER = "broker.hivemq.com"
-PORT = 1883
-TOPIC = "test/topic"
-
-def on_message(client, userdata, msg):
-    print(f"Received message: {msg.payload.decode()} on topic {msg.topic}")
-
-client = mqtt.Client()
-
-client.on_message = on_message
-
-client.connect(BROKER, PORT, 60)
-
-client.subscribe(TOPIC)
-
-print("Listening for messages...")
-client.loop_forever()
+# Subscribe example
+sub = MQTTSubscriber(broker='broker.emqx.io', topic='my/topic', port=1883)
+sub.connect()
+sub.subscribe()
+sub.loop_forever()  # listens indefinitely
 ```
 
-### Explanation:
-1. **Importing the library**: We use `paho.mqtt.client` to interact with MQTT.
-2. **Broker and Port Setup**: We connect to the same MQTT broker `broker.hivemq.com` on port `1883`.
-3. **Define `on_message` Function**: This function is triggered when a new message is received. It prints the message payload and the topic.
-4. **Connect to the Broker**: We connect to the broker using `client.connect()`.
-5. **Subscribe to a Topic**: We subscribe to the topic `"test/topic"` to listen for messages.
-6. **Loop to Listen for Messages**: `client.loop_forever()` keeps the program running and waiting for new messages indefinitely.
+### 📤 Publish Messages
+
+```python
+pub = MQTTPublisher(broker='broker.emqx.io', port=1883, qos=1, retain=True)
+pub.connect()
+pub.publish('my/topic', 'Hello MQTT! 😊')
+pub.disconnect()
+```
+
+### 📦 CLI Example
+
+```bash
+python mqtt_tool.py --mode pub --topic my/topic --message "testing 123" --qos 1
+python mqtt_tool.py --mode sub --topic my/topic --broker demo.mosquitto.org
+```
 
 ---
 
-## 🚀 **How to Run the Code**
+## 📁 Code Structure
 
-1. **Start the Subscriber**:
-   Open a terminal and run:
-   ```sh
-   python subscriber.py
-   ```
-   The Subscriber will now be listening for messages on the specified topic.
+```
+MQTT-Messaging-Python/
+├── mqtt_tool.py          # CLI wrapper
+├── mqtt_messaging.py     # Core publish & subscribe classes
+├── requirements.txt      # Dependencies
+└── README.md             # This file
+```
 
-2. **Run the Publisher**:
-   In a separate terminal, run:
-   ```sh
-   python publisher.py
-   ```
-   The Publisher will send a message to the MQTT broker.
-
-3. **Observe**:
-   - Once you run the Publisher, you’ll see the message received by the Subscriber in the terminal running `subscriber.py`.
+* `MQTTPublisher`: MQTT client for publishing
+* `MQTTSubscriber`: MQTT client for subscribing with callback support
+* CLI script parses basic flags and invokes classes
 
 ---
 
-## 🧑‍💻 **Extending the Project**
+## 🔒 Security & Tips
 
-You can further extend this project to:
-- **Two-way Communication**: Implement both publishing and subscribing in the same script.
-- **Message Persistence**: Store received messages in a database (e.g., SQLite or MongoDB).
-- **Security**: Add authentication to the MQTT connection with user credentials or use TLS encryption for secure communication.
-- **Quality of Service (QoS)**: MQTT allows different levels of QoS to ensure message delivery reliability. You can experiment with different QoS settings when publishing or subscribing.
-
----
-
-## 🔧 **Troubleshooting**
-
-- If you encounter connection issues, make sure the MQTT broker is running and reachable.
-- Check for any firewall or network configuration that may block the connection to the broker.
+* ⚙️ Use `client.tls_set(...)` and `username_pw_set()` for secure, authenticated connections ([github.com][1], [emqx.com][2], [hivemq.com][3])
+* Auto-reconnect ensures resilience in unstable networks ([emqx.com][2])
+* Set **QoS** appropriately (`0`, `1`, `2`) for guaranteed delivery or low latency
+* Consider using Last Will & Testament (LWT) for failure messaging in IoT deployments
 
 ---
 
-## 💬 **Questions or Issues?**
-Feel free to open an issue in the repository if you have any questions or need assistance with setup!
+## 🤝 Contributing
+
+Enhancements are welcome! Suggestions include:
+
+* 🔁 Support for batch publishing or message queues
+* 📊 Add message logging or replay functionality
+* 🌐 Support for MQTT v5 features: message expiry, shared subscriptions
+* 🧪 Add unit tests with pytest/mock
+* 📦 Package as a pip-installable library
+
+To contribute:
+
+1. Fork the repository
+2. Create a branch (`feature/...`)
+3. Implement tests and document changes
+4. Open a Pull Request
 
 ---
 
-Good luck with your MQTT project! 🚀
+## 📄 License
+
+Released under the **MIT License**. See `LICENSE` for details.
